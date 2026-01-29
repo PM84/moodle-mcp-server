@@ -53,18 +53,34 @@ npm run build
 
 ## Configuration
 
-The server needs to know where your Moodle source code is located. You can configure this in two ways:
+The server needs to know where your Moodle source code is located. You can configure this in several ways (in order of priority):
 
-### Option 1: Environment Variable
-
-```bash
-export MOODLE_SRC_PATH=/path/to/your/moodle
-```
-
-### Option 2: CLI Argument
+### Option 1: CLI Argument
 
 ```bash
 moodle-mcp-server --moodle-path=/path/to/your/moodle
+
+# Relative paths are also supported
+moodle-mcp-server --moodle-path=.
+moodle-mcp-server --moodle-path=../moodle
+```
+
+### Option 2: Environment Variable
+
+```bash
+export MOODLE_SRC_PATH=/path/to/your/moodle
+
+# Or use "." for current directory
+export MOODLE_SRC_PATH=.
+```
+
+### Option 3: Current Working Directory (Auto-detect)
+
+If no path is configured, the server will automatically use the **current working directory**. This is especially useful in VS Code when you have a Moodle repository open as your workspace.
+
+```bash
+cd /path/to/moodle
+moodle-mcp-server  # Uses current directory
 ```
 
 ## Usage with Claude Desktop
@@ -101,6 +117,8 @@ Or if installed globally:
 }
 ```
 
+**Tip**: You can use `"."` as the path if Claude Desktop's working directory is your Moodle folder.
+
 ## Usage with VS Code
 
 Add to your VS Code settings (`.vscode/settings.json` or user settings):
@@ -114,6 +132,34 @@ Add to your VS Code settings (`.vscode/settings.json` or user settings):
       "env": {
         "MOODLE_SRC_PATH": "/path/to/your/moodle"
       }
+    }
+  }
+}
+```
+
+**Using the current workspace as Moodle path:**
+
+If your VS Code workspace root **is** the Moodle repository, you can use `"."` or `"${workspaceFolder}"`:
+
+```json
+{
+  "mcp.servers": {
+    "moodle": {
+      "command": "npx",
+      "args": ["-y", "moodle-mcp-server", "--moodle-path=."]
+    }
+  }
+}
+```
+
+Or simply omit the path entirely – the server will auto-detect the current working directory:
+
+```json
+{
+  "mcp.servers": {
+    "moodle": {
+      "command": "npx",
+      "args": ["-y", "moodle-mcp-server"]
     }
   }
 }

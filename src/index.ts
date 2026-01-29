@@ -31,24 +31,34 @@ import {
 // ============================================================================
 
 /**
- * Gets the Moodle source path from environment or CLI arguments.
+ * Gets the Moodle source path from environment, CLI arguments, or current directory.
+ * 
+ * Priority:
+ * 1. CLI argument: --moodle-path=<path>
+ * 2. Environment variable: MOODLE_SRC_PATH
+ * 3. Current working directory (if it looks like a Moodle installation)
  */
 function getMoodlePath(): string {
   // Check CLI argument first
   const cliArg = process.argv.find((arg) => arg.startsWith("--moodle-path="));
   if (cliArg) {
-    return cliArg.split("=")[1];
+    const argPath = cliArg.split("=")[1];
+    // Support relative paths and "."
+    return path.resolve(argPath);
   }
 
   // Check environment variable
   const envPath = process.env.MOODLE_SRC_PATH;
   if (envPath) {
-    return envPath;
+    // Support relative paths and "."
+    return path.resolve(envPath);
   }
 
-  throw new Error(
-    "Moodle source path not configured. Please set MOODLE_SRC_PATH environment variable or use --moodle-path=<path> argument."
-  );
+  // Fall back to current working directory
+  // This is useful when running from within a Moodle directory in VS Code
+  const cwd = process.cwd();
+  console.error(`[moodle-mcp-server] No path configured, using current directory: ${cwd}`);
+  return cwd;
 }
 
 /**
